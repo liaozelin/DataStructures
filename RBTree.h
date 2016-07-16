@@ -12,17 +12,16 @@ class RBTree {
             RBNode* left;
             RBNode* right;
             RBNode* parent;
-            RBNode(ElementType e, ColorType c = red)
-                : ele(e), color(c), left(NULL), right(NULL), parent(NULL) {}
         };
         typedef RBNode* RBtree;
-        
+    private: 
         RBtree root;
         RBtree nil;
     public:
         RBTree() {
-            nil = new RBNode(-1);
+            nil = new RBNode();
             nil->left = nil->right = nil->parent = nil;
+            nil->color = black;
             root = nil;
         }
         ~RBTree() { destroy(); }
@@ -68,24 +67,29 @@ class RBTree {
             x->parent = y;
         }
 
-        void insert(ElementType e) {
-            RBtree newNode = new RBNode(e);  // 新建结点,默认为红色
-            RBtree p = nil;
+        bool insert(ElementType e) {
+            RBtree p = nil;  // p 指向要插入位置的父节点
             RBtree x = root;
             while (x != nil) {
                 p = x;
                 if (e > x->ele)
                     x = x->right;
-                else
+                else if (e < x->ele)
                     x = x->left;
+                else
+                    return false;
             }
+            RBtree newNode = new RBNode();  // 新建结点,默认为红色
+            newNode->ele = e;
+            newNode->color = red;
+            newNode->left = newNode->right = nil;
             if (p->ele < e)
                 p->right = newNode;
             else
                 p->left = newNode;
             newNode->parent = p;  // link new node
-            newNode->left = newNode->right = nil;
             insert_fixup(newNode);
+            return true;
         }
         void insert_fixup(RBtree x) {
             while (x->parent->color == red) {
@@ -95,10 +99,12 @@ class RBTree {
                         u->color = x->parent->color = black;
                         x->parent->parent->color = red;
                         x = x->parent->parent;
-                    } else if (x == x->parent->right) {  // condition 2: uncle is black and x is a left child
-                        x = x->parent;
-                        LeftRotate(x);  // after rotate, condition 2 becomes condition 3
-                    } else {  // condition 3: uncle is black and x is a right child
+                    } else {  // uncle is black
+                        if (x == x->parent->right) {  // condition 2: uncle is black and x is a left child
+                            x = x->parent;
+                            LeftRotate(x);  // after rotate, condition 2 becomes condition 3
+                        }
+                        // condition 3: uncle is black and x is a right child
                         x->parent->color = black;
                         x->parent->parent->color = red;
                         RightRotate(x->parent->parent);
@@ -109,10 +115,11 @@ class RBTree {
                         u->color = x->parent->color = black;
                         u->parent->color = red;
                         x = x->parent->parent;
-                    } else if (x == x->parent->left) {
-                        x = x->parent;
-                        RightRotate(x);
-                    } else {
+                    } else{
+                        if (x == x->parent->left) {
+                            x = x->parent;
+                            RightRotate(x);
+                        }
                         x->parent->color = black;
                         x->parent->parent->color = red;
                         LeftRotate(x->parent->parent);
@@ -122,6 +129,10 @@ class RBTree {
             root->color = black;
         }
 
+        bool empty() {
+            if (root == nil) return true;
+            else return false;
+        }
         RBtree maxinum(RBtree r) {
             if (r == nil) return nil;
             while (r->right != nil) r = r->right;
@@ -151,25 +162,25 @@ class RBTree {
             else
                 x->parent->right = y;
         }
-        void remove(ElementType e) {
-            RBtree z = find(e);
-            if (z == nil) return;
+        bool remove(ElementType e) {
+            RBtree z = find(e);  // z is the deleted node
+            if (z == nil) return false;
             RBtree y = z;
             ColorType oldColor = z->color;
-            RBtree x;
+            RBtree z_child;  // z's child, replace z's original position
             if (z->left == nil) {
-                x = z->right;
+                z_child = z->right;
                 transplant(z, z->right);
             } else if (z->right == nil) {
-                x = z->left;
+                z_child = z->left;
                 transplant(z, z->left);
             } else {
                 // 用要删除的节点的后继来代替该节点,即用y代替z
                 y = mininum(z->right);
                 oldColor = y->color;
-                x = y->right;
+                z_child = y->right;
                 if (y->parent == z) {  // y->right doesn't change
-                    x->parent = y;
+                    z_child->parent = y;
                 } else {  // y->right becomes z->right
                     transplant(y, y->right);
                     y->right = z->right;  // link y and z->right
@@ -182,7 +193,8 @@ class RBTree {
             }
             delete z;
             if (oldColor == black)
-                remove_fixup(x);
+                remove_fixup(z_child);
+            return true;
         }
         void remove_fixup(RBtree x) {
             RBtree w;
@@ -204,12 +216,13 @@ class RBTree {
                         w->color = red;
                         RightRotate(w);
                         w = x->parent->right;
-                    } else {  // condition 4
-                        w->color = x->parent->color;
-                        x->parent->color = black;
-                        w->right->color = black;
-                        LeftRotate(x->parent);
                     }
+                    // condition 4
+                    w->color = x->parent->color;
+                    x->parent->color = black;
+                    w->right->color = black;
+                    LeftRotate(x->parent);
+                    x = root;
                 } else {
                     w = x->parent->left;
                     if (w->color == red) {
@@ -226,15 +239,37 @@ class RBTree {
                         w->left->color = red;
                         LeftRotate(x->parent);
                         w = x->parent->left;
-                    } else {
-                        w->color = x->parent->color;
-                        x->parent->color = black;
-                        w->left->color = black;
-                        RightRotate(x->parent);
                     }
+                    w->color = x->parent->color;
+                    x->parent->color = black;
+                    w->left->color = black;
+                    RightRotate(x->parent);
+                    x = root;
                 }
-                x->color = black;
             }
+            x->color = black;
+        }
+
+        void preOrder() { PreOrder(root); }
+        void PreOrder(RBtree r) {
+            if (r == nil) return;
+            std::cout << r->ele << ' ';
+            PreOrder(r->left);
+            PreOrder(r->right);
+        }
+        void inOrder() { InOrder(root); }
+        void InOrder(RBtree r) {
+            if (r == nil) return;
+            InOrder(r->left);
+            std::cout << r->ele << ' ';
+            InOrder(r->right);
+        }
+        void postOrder() { PostOrder(root); }
+        void PostOrder(RBtree r) {
+            if (r == nil) return;
+            PostOrder(r->left);
+            PostOrder(r->right);
+            std::cout << r->ele << ' ';
         }
 };
 #endif
