@@ -11,167 +11,167 @@ typedef char vertexInfo;
 // undirected graph realized by adjacency matrix
 class Graph {
 private:
-	int n, e;  // n is the number of vertexes, e is the number of edges
-	vertexInfo info[MAXSIZE];
-	int edges[MAXSIZE][MAXSIZE];
+    int n, e;  // n is the number of vertexes, e is the number of edges
+    vertexInfo info[MAXSIZE];
+    int edges[MAXSIZE][MAXSIZE];
 public:
-	Graph() {
-		memset(edges, 0, sizeof(edges));
-	}
-	~Graph() {}
+    Graph() {
+        memset(edges, 0, sizeof(edges));
+    }
+    ~Graph() {}
 
-	void createGraph() {
-		cout << "Please input vertex number and edges number:\n";
-		cin >> n >> e;
-		cout << "Please input infomation(char) of vertexes:\n";
-		for (int i = 0; i < n; ++i) {
-			cin >> info[i];
-		}
-		cout << "Please input two vertexes of each edge:\n";
-		int i, j, k;
-		for (k = 0; k < e; ++k) {
-			cin >> i >> j;
-			edges[i][j] = 1;
-			edges[j][i] = 1;
-		}
-	}
+    void createGraph() {
+        cout << "Please input vertex number and edges number:\n";
+        cin >> n >> e;
+        cout << "Please input infomation(char) of vertexes:\n";
+        for (int i = 0; i < n; ++i) {
+            cin >> info[i];
+        }
+        cout << "Please input two vertexes of each edge:\n";
+        int i, j, k;
+        for (k = 0; k < e; ++k) {
+            cin >> i >> j;
+            edges[i][j] = 1;
+            edges[j][i] = 1;
+        }
+    }
 
-	void dfs() {
-		bool* visited = new bool[n];
-		memset(visited, false, sizeof(visited));
-		cout << "Please input the start vertex of dfs(start from 0):\n";
-		int i;
-		cin >> i;
-		cout << "Graph dfs: ";
-		dfs_driver(i, visited);
-		delete [] visited;
-	}
-	void dfs_driver(int i, bool* visited) {
-		cout << info[i] << ' ';
-		visited[i] = 1;
-		for (int j = 0; j < n; ++j) {
-			if (visited[j] == 0 && edges[i][j] != 0) dfs_driver(j, visited);
-		}
-	}
+    void dfs() {
+        bool* visited = new bool[n];
+        memset(visited, false, sizeof(visited));
+        cout << "Please input the start vertex of dfs(start from 0):\n";
+        int i;
+        cin >> i;
+        cout << "Graph dfs: ";
+        dfs_driver(i, visited);
+        delete [] visited;
+    }
+    void dfs_driver(int i, bool* visited) {
+        cout << info[i] << ' ';
+        visited[i] = 1;
+        for (int j = 0; j < n; ++j) {
+            if (visited[j] == 0 && edges[i][j] != 0) dfs_driver(j, visited);
+        }
+    }
 
-	void bfs() {
-		queue<int> que;
-		bool* visited = new bool[n];
-		memset(visited, false, sizeof(visited));
-		cout << "Please input the start vertex of bfs(start from 0):\n";
-		int i;
-		cin >> i;
-		que.push(i);
-		cout << "Graph bfs: ";
-		while (!que.empty()) {
-			int t = que.front();
-			que.pop();
-			if (visited[t] == 0) {
-				cout << info[t] << ' ';
-				visited[t] = 1;
-				for (int j = 0; j < n; ++j) {
-					if (visited[j] == 0 && edges[t][j] != 0)
-						que.push(j);
-				}
-			}
-		}
-		delete [] visited;
-	}
+    void bfs() {
+        queue<int> que;
+        bool* visited = new bool[n];
+        memset(visited, false, sizeof(visited));
+        cout << "Please input the start vertex of bfs(start from 0):\n";
+        int i;
+        cin >> i;
+        que.push(i);
+        cout << "Graph bfs: ";
+        while (!que.empty()) {
+            int t = que.front();
+            que.pop();
+            if (visited[t] == 0) {
+                cout << info[t] << ' ';
+                visited[t] = 1;
+                for (int j = 0; j < n; ++j) {
+                    if (visited[j] == 0 && edges[t][j] != 0)
+                        que.push(j);
+                }
+            }
+        }
+        delete [] visited;
+    }
 };
 
 // undirected graph realized by adjacency list
 class Graph_List {
 private:
-	struct EdgeNode {
-		int index;
-	 	EdgeNode* next;
-	 	EdgeNode(int i, EdgeNode* n = NULL) : index(i), next(n) {}
-	};
-	struct VertexNode {
-		vertexInfo info;
-		EdgeNode* edges;
-		VertexNode(vertexInfo i = '#') : info(i) {
-			edges = new EdgeNode(-1);
-		}
-		~VertexNode() {
-			while (this->edges->next != NULL) {
-				EdgeNode* t = this->edges->next;
-				this->edges->next = this->edges->next->next;
-				delete t;
-			}
-			delete this->edges;
-		}
-	};
+    struct EdgeNode {
+        int index;
+        EdgeNode* next;
+        EdgeNode(int i, EdgeNode* n = NULL) : index(i), next(n) {}
+    };
+    struct VertexNode {
+        vertexInfo info;
+        EdgeNode* edges;
+        VertexNode(vertexInfo i = '#') : info(i) {
+            edges = new EdgeNode(-1);
+        }
+        ~VertexNode() {
+            while (this->edges->next != NULL) {
+                EdgeNode* t = this->edges->next;
+                this->edges->next = this->edges->next->next;
+                delete t;
+            }
+            delete this->edges;
+        }
+    };
 
-	VertexNode vertexes[MAXSIZE];
-	int n, e;  // n is the number of vertexes, e is the number of edges
+    VertexNode vertexes[MAXSIZE];
+    int n, e;  // n is the number of vertexes, e is the number of edges
 
 public:
-	Graph_List() {}
-	~Graph_List() {}
+    Graph_List() {}
+    ~Graph_List() {}
 
-	void createGraph() {
-		cout << "Please input the number of vertexes and the number of edges:\n";
-		cin >> n >> e;
-		cout << "Please input infomation(char) of each vertex:\n";
-		for (int i = 0; i < n; ++i) {
-			cin >> vertexes[i].info;
-		}
-		cout << "Please input two vertexes of each edge:\n";
-		int i, j, k;
-		for (k = 0; k < e; ++k) {
-			cin >> i >> j;
-			EdgeNode* newNode = new EdgeNode(j, vertexes[i].edges->next);
-			vertexes[i].edges->next = newNode;
-			EdgeNode* newNode_2 = new EdgeNode(i, vertexes[j].edges->next);
-			vertexes[j].edges->next = newNode_2;
-		}
-	}
+    void createGraph() {
+        cout << "Please input the number of vertexes and the number of edges:\n";
+        cin >> n >> e;
+        cout << "Please input infomation(char) of each vertex:\n";
+        for (int i = 0; i < n; ++i) {
+            cin >> vertexes[i].info;
+        }
+        cout << "Please input two vertexes of each edge:\n";
+        int i, j, k;
+        for (k = 0; k < e; ++k) {
+            cin >> i >> j;
+            EdgeNode* newNode = new EdgeNode(j, vertexes[i].edges->next);
+            vertexes[i].edges->next = newNode;
+            EdgeNode* newNode_2 = new EdgeNode(i, vertexes[j].edges->next);
+            vertexes[j].edges->next = newNode_2;
+        }
+    }
 
-	void dfs() {
-		bool* visited = new bool[n];
-		memset(visited, false, sizeof(visited));
-		cout << "Please input the start vertex of dfs(start from 0):\n";
-		int i;
-		cin >> i;
-		cout << "Graph_List dfs: ";
-		dfs_driver(i, visited);
-		delete [] visited;
-	}
-	void dfs_driver(int i, bool* visited) {
-		cout << vertexes[i].info << ' ';
-		visited[i] = 1;
-		EdgeNode* t = vertexes[i].edges->next;
-		while (t != NULL) {
-			if (visited[t->index] == 0) dfs_driver(t->index, visited);
-			t = t->next;
-		}
-	}
+    void dfs() {
+        bool* visited = new bool[n];
+        memset(visited, false, sizeof(visited));
+        cout << "Please input the start vertex of dfs(start from 0):\n";
+        int i;
+        cin >> i;
+        cout << "Graph_List dfs: ";
+        dfs_driver(i, visited);
+        delete [] visited;
+    }
+    void dfs_driver(int i, bool* visited) {
+        cout << vertexes[i].info << ' ';
+        visited[i] = 1;
+        EdgeNode* t = vertexes[i].edges->next;
+        while (t != NULL) {
+            if (visited[t->index] == 0) dfs_driver(t->index, visited);
+            t = t->next;
+        }
+    }
 
-	void bfs() {
-		queue<int> que;
-		bool* visited = new bool[n];
-		memset(visited, false, sizeof(visited));
-		cout << "Please input the start vertex of bfs(start from 0):\n";
-		int i;
-		cin >> i;
-		que.push(i);
-		cout << "Graph_List bfs: ";
-		while (!que.empty()) {
-			int i = que.front();
-			que.pop();
-			if (visited[i] == 0) {
-				cout << vertexes[i].info << ' ';
-				visited[i] = 1;
-				EdgeNode* t = vertexes[i].edges->next;
-				while (t != NULL) {
-					if (visited[t->index] == 0) que.push(t->index);
-					t = t->next;
-				}
-			}
-		}
-		delete [] visited;
-	}
+    void bfs() {
+        queue<int> que;
+        bool* visited = new bool[n];
+        memset(visited, false, sizeof(visited));
+        cout << "Please input the start vertex of bfs(start from 0):\n";
+        int i;
+        cin >> i;
+        que.push(i);
+        cout << "Graph_List bfs: ";
+        while (!que.empty()) {
+            int i = que.front();
+            que.pop();
+            if (visited[i] == 0) {
+                cout << vertexes[i].info << ' ';
+                visited[i] = 1;
+                EdgeNode* t = vertexes[i].edges->next;
+                while (t != NULL) {
+                    if (visited[t->index] == 0) que.push(t->index);
+                    t = t->next;
+                }
+            }
+        }
+        delete [] visited;
+    }
 };
 
 /* 拓扑排序只适用于有向无圈图

@@ -93,7 +93,7 @@ void heapsort(T* arr, int n) {
     }
     for (int i = n - 1; i > 0; --i) {
         swap(arr, arr + i); // 将最大值移到数组末尾
-        perc_down(arr, 0, i - 1); // 现在arr[o]为一个新的值，需要进行下推
+        perc_down(arr, 0, i - 1); // 现在arr[0]为一个新的值，需要进行下推
     }
 }
 
